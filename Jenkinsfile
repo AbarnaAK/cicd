@@ -25,18 +25,13 @@ pipeline {
    }
   }
   
- post {
-    always {
-       
-        script {
-            sh 'docker rm -f mypycont || true' // Remove the container, ignore failure if it doesn't exist
-            sh 'docker run --name mypycont -d -p 3000:5000 my-flask'
-        }
-
-        
+ post{
+    always{
+        sh 'docker rm -f mypycont'
+        sh 'docker run --name mypycont -d -p 3000:5000 my-flask'
         emailext to: "abarna.s272@gmail.com",
-                 subject: "Notification mail from Jenkins",
-                 body: "CI/CD pipeline completed successfully."
+        subject: "Notification mail from jenkins",
+        body: "CiCd pipeline"
+        }
     }
-}
 }
