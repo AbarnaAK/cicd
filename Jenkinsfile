@@ -8,30 +8,35 @@ pipeline {
         sh 'docker tag my-flask $DOCKER_BFLASK_IMAGE'
       }
     }
+    
     stage('Test') {
       steps {
         sh 'docker run my-flask python -m pytest app/tests/'
       }
     }
-    stage('Deploy') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDS}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-          sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
-          sh 'docker push $DOCKER_BFLASK_IMAGE'
-        }
-      }
-    }
     
+   stage('Login into DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
+                    sh 'docker push $DOCKER_BFLASK_IMAGE'
+                }
+            }
+   }
   }
-
-post{
-      always{
-            sh 'docker rm -f mypycont'
+  
+ post {
+    always {
+       
+        script {
+            sh 'docker rm -f mypycont || true' // Remove the container, ignore failure if it doesn't exist
             sh 'docker run --name mypycont -d -p 3000:5000 my-flask'
-            emailext to: "abarna.s272@gmail.com",
-            subject: "Notification mail from jenkins",
-            body: "CiCd pipeline"
         }
-}
 
+        
+        emailext to: "abarna.s272@gmail.com",
+                 subject: "Notification mail from Jenkins",
+                 body: "CI/CD pipeline completed successfully."
+    }
+}
 }
