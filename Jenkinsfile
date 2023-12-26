@@ -34,7 +34,7 @@ pipeline {
         }
 
         
-        emailext to: "vennilavan@guvi.in",
+        emailext to: "abarna.s272@gmail.com",
                  subject: "Notification mail from Jenkins",
                  body: "CI/CD pipeline completed successfully."
     }
